@@ -24,3 +24,8 @@ logs/
 Thumbs.db
 # Ignore local colab helper scripts
 update_branch.py
+
+pull_branch.py
+
+# Ignore Git helper functions folder
+gitfunctions/
