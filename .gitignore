@@ -1,0 +1,24 @@
+# Python caches
+__pycache__/
+*.py[cod]
+*$py.class
+.ipynb_checkpoints/
+
+# Large model weights and data
+*.ckpt
+*.bin
+*.pth
+*.pt
+*.safetensors
+*.h5
+data/
+datasets/
+
+# Logs
+wandb/
+logs/
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
