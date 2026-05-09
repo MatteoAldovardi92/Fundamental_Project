@@ -186,3 +186,7 @@ data/
 datasets/
 __pycache__/
 .ipynb_checkpoints/
+
+# Ignore weight directories
+eomt_weights/
+eomt/eomt_weights/
