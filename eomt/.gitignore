@@ -178,25 +178,3 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
-
-# Automatically ignored large files to prevent Git stalling
-*.bin
-*.ckpt
-data/
-datasets/
-__pycache__/
-.ipynb_checkpoints/
-
-# Ignore weight directories
-eomt_weights/
-eomt/eomt_weights/
-
-# Ignore large ML files and datasets
-*.safetensors
-*.bin
-*.pt
-*.pth
-*.h5
-*.csv
-*.json
-Saved_Models/
