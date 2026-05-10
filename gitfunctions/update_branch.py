@@ -1,23 +1,22 @@
 import os
-import sys
-import subprocess
+import argparse
 
 def run_cmd(cmd):
     print(f"> {cmd}")
     os.system(cmd)
 
 if __name__ == "__main__":
-    commit_message = "Update from Colab"
-    if len(sys.argv) > 1:
-        commit_message = sys.argv[1]
-        
+    parser = argparse.ArgumentParser(description="Commit and push changes to GitHub.")
+    # Message is an optional positional argument
+    parser.add_argument("message", nargs="?", default="Update from Colab", help="Commit message")
+    # Branch is an optional named argument defaulting to 'main'
+    parser.add_argument("--branch", "-b", default="main", help="Target branch to push to (default: main)")
+    args = parser.parse_args()
+
     print("--- Starting Update Process ---")
     run_cmd("git add .")
-    run_cmd(f'git commit -m "{commit_message}"')
+    run_cmd(f'git commit -m "{args.message}"')
     
-    # Automatically get the current active branch
-    current_branch = subprocess.getoutput("git rev-parse --abbrev-ref HEAD")
-    
-    print(f"Pushing to branch: {current_branch}")
-    run_cmd(f"git push origin {current_branch}")
+    print(f"Pushing to branch: {args.branch}")
+    run_cmd(f"git push origin {args.branch}")
     print("--- Update Complete! ---")

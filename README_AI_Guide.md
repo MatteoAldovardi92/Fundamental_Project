@@ -13,5 +13,7 @@ Welcome to the Fundamental Project! This repository is focused on Machine Learni
 - **`eval/`**: Contains scripts to evaluate model performance (IoU metrics, anomaly detection).
 - **`eomt/`**: Contains the core model architectures, configurations, and training pipelines.
 - **`gitfunctions/`**: Helper scripts designed to make Git commands easier from Google Colab.
+- **`coco-classes-mapping-master/`**: Utilities for handling COCO dataset class indices.
+- **`trained_models/`**: Designated storage for model weights.
 
 Dive into each subfolder to find its specific `README_AI_Guide.md` for more details on the individual scripts!

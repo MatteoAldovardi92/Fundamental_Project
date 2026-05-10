@@ -1,19 +1,18 @@
-import sys
-import subprocess
+import os
+import argparse
 
 def run_cmd(cmd):
     print(f"> {cmd}")
-    result = subprocess.run(cmd, shell=True, text=True, capture_output=True)
-    if result.stdout:
-        print(result.stdout.strip())
-    if result.stderr:
-        print(result.stderr.strip())
+    os.system(cmd)
 
-# Get branch name from arguments or use a default
-branch_name = sys.argv[1] if len(sys.argv) > 1 else "matteo_branch"
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Pull latest changes from GitHub.")
+    # Make branch an optional positional argument defaulting to 'main'
+    parser.add_argument("branch", nargs="?", default="main", help="Target branch to pull (default: main)")
+    args = parser.parse_args()
 
-print(f"\n--- Starting Pull Process for branch: {branch_name} ---")
-run_cmd("git fetch origin")
-run_cmd(f"git checkout {branch_name}")
-run_cmd(f"git pull origin {branch_name}")
-print("--- Pull Complete! ---\n")
+    print(f"--- Pulling latest changes for branch: {args.branch} ---")
+    run_cmd("git fetch origin")
+    run_cmd(f"git checkout {args.branch}")
+    run_cmd(f"git pull origin {args.branch}")
+    print("--- Pull Complete! ---")
