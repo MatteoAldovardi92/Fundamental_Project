@@ -14,7 +14,6 @@ This repository contains the consolidated and optimized codebase for cross-task 
 
 ## Key Files
 - **`Step4.ipynb` & `Step4_Professional_Cleaned.ipynb`**: Jupyter notebooks demonstrating the final optimized cross-task evaluation, utilizing the `eomt` module dynamically.
-- **`main.py`**: The central entry point for running the framework.
 - **`requirements.txt`**: List of dependencies required to run the environment.
 
 ## Setup & Execution
