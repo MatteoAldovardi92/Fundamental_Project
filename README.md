@@ -13,14 +13,10 @@ This repository contains the consolidated and optimized codebase for cross-task 
 - **`/gitfunctions`**: Utility scripts to help manage Git operations within Colab.
 
 ## Key Files
-- **`Step4.ipynb` & `Step4_Professional_Cleaned.ipynb`**: Jupyter notebooks demonstrating the final optimized cross-task evaluation, utilizing the `eomt` module dynamically.
+- **`Step4_fixed.ipynb` & `Step4_Professional_Cleaned.ipynb`**: Jupyter notebooks demonstrating the final optimized cross-task evaluation, utilizing the `eomt` module dynamically.
 - **`requirements.txt`**: List of dependencies required to run the environment.
 
 ## Setup & Execution
 1. Install dependencies: `pip install -r requirements.txt` (and ensure `lightning`, `jsonargparse` are installed).
 2. Use the provided Jupyter Notebooks (e.g., `Step4_Professional_Cleaned.ipynb`) for inference, evaluation, and visualizations without manual model-rebuilding.
 
-## Recent Updates
-- Complete structural overhaul: Removed duplicates and consolidated loose files.
-- Separated evaluation logic (`eval/`) from core model definitions (`eomt/`).
-- Automated large file `.gitignore` management to prevent Git stalling.
