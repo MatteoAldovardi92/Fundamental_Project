@@ -200,3 +200,7 @@ eomt/eomt_weights/
 *.csv
 *.json
 Saved_Models/
+
+# Ignore compressed datasets and data folders
+*.zip
+eomt/data/
