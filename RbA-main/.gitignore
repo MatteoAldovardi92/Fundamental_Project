@@ -1,8 +1,25 @@
-*.ckpt
+output
+instant_test_output
+inference_test_output
+anomaly_scores
+wandb
+model_logs
+road-anomaly-benchmark
+road_anomaly_benchmark
+smiyc_outputs
+plots
+animation
+# pretrained
+warehouse
+anomaly_scores
 
-_site/
-lightning_logs/
-wandb/
+*.png
+*.json
+*.diff
+*.jpg
+*.pkl
+*.pth
+*.pth.tar
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -68,7 +85,7 @@ db.sqlite3
 db.sqlite3-journal
 
 # Flask stuff:
-# instance/
+instance/
 .webassets-cache
 
 # Scrapy stuff:
@@ -100,12 +117,6 @@ ipython_config.py
 #   install all needed dependencies.
 #Pipfile.lock
 
-# UV
-#   Similar to Pipfile.lock, it is generally recommended to include uv.lock in version control.
-#   This is especially recommended for binary packages to ensure reproducibility, and is more
-#   commonly ignored for libraries.
-#uv.lock
-
 # poetry
 #   Similar to Pipfile.lock, it is generally recommended to include poetry.lock in version control.
 #   This is especially recommended for binary packages to ensure reproducibility, and is more
@@ -118,10 +129,8 @@ ipython_config.py
 #pdm.lock
 #   pdm stores project-wide configurations in .pdm.toml, but it is recommended to not include it
 #   in version control.
-#   https://pdm.fming.dev/latest/usage/project/#working-with-version-control
+#   https://pdm.fming.dev/#use-with-ide
 .pdm.toml
-.pdm-python
-.pdm-build/
 
 # PEP 582; used by e.g. github.com/David-OConnor/pyflow and github.com/pdm-project/pdm
 __pypackages__/
@@ -172,45 +181,3 @@ cython_debug/
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
-
-# Ruff stuff:
-.ruff_cache/
-
-# PyPI configuration file
-.pypirc
-
-# Automatically ignored large files to prevent Git stalling
-*.bin
-*.ckpt
-data/
-datasets/
-__pycache__/
-.ipynb_checkpoints/
-
-# Ignore weight directories
-eomt_weights/
-eomt/eomt_weights/
-
-# Ignore large ML files and datasets
-*.safetensors
-*.bin
-*.pt
-*.pth
-*.h5
-*.csv
-*.json
-Saved_Models/
-
-# Ignore compressed datasets and data folders
-*.zip
-eomt/data/
-
-Anomaly_Validation_Datasets.zip
-eomt/data/gtFine_trainvaltest.zip
-eomt/data/leftImg8bit_trainvaltest.zip
-eomt/eomt_weights/eomt_coco.bin
-eomt/eomt_weights/eomt_cityscapes.bin
-eomt/eomt_weights/eomt_cityscapes.ckpt
-eomt/eomt_weights/eomt_coco.ckpt
-checkpoints/cityscapes_lora/eomt-lora-epoch=20-val_iou=0.00.ckpt
-checkpoints/cityscapes_lora/eomt-lora-epoch=21-val_iou=0.00.ckpt
