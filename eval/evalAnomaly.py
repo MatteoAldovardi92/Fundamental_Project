@@ -97,11 +97,11 @@ def main():
     for path in glob.glob(os.path.expanduser(str(args.input[0]))):
         print(path)
         images = input_transform((Image.open(path).convert('RGB'))).unsqueeze(0).float().cuda()
-        images = images.permute(0,3,1,2)
+        # images = images.permute(0,3,1,2)
         with torch.no_grad():
             result = model(images)
         anomaly_result = 1.0 - np.max(result.squeeze(0).data.cpu().numpy(), axis=0)            
-        pathGT = path.replace("images", "labels_masks")                
+        pathGT = path.replace("images", "labels_masks").replace(".jpg", ".png").replace(".webp", ".png").replace(".jpg", ".png").replace(".jpg", ".png")                
         if "RoadObsticle21" in pathGT:
            pathGT = pathGT.replace("webp", "png")
         if "fs_static" in pathGT:

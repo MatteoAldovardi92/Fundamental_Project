@@ -1,37 +1,13 @@
-# Core Dependencies
-torch>=1.9.0
+torch
 torchvision
-lightning>=2.0.0
-transformers
-timm
-torchmetrics
-fvcore
-
-# Anomaly Detection & OOD Metrics
-ood-metrics
-scikit-learn
-scipy
-opencv-python
-matplotlib
-pillow
-
-# Fine-Tuning & Optimization
-peft
-torchao>=0.16.0
-
-# Data Handling & Utilities
-albumentations
-easydict
-h5py
-tqdm
-wget
-gdown
-gitignore_parser
+lightning
 jsonargparse[signatures]>=4.27.7
-pycocotools
-pyyaml
-pandas
-
-# Notebook Support
-ipykernel
-ipywidgets
+gitignore_parser
+wget
+ood_metrics
+scikit-learn
+numpy
+Pillow
+tqdm
+matplotlib
+yaml
