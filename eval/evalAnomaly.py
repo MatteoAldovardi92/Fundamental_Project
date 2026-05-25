@@ -4,6 +4,7 @@ import cv2
 import glob
 import torch
 import random
+import sys
 from PIL import Image
 import numpy as np
 from erfnet import ERFNet
@@ -12,6 +13,7 @@ from argparse import ArgumentParser
 from ood_metrics import fpr_at_95_tpr, calc_metrics, plot_roc, plot_pr,plot_barcode
 from sklearn.metrics import roc_auc_score, roc_curve, auc, precision_recall_curve, average_precision_score
 from torchvision.transforms import Compose, Resize, ToTensor, Normalize
+import torch.nn.functional as F
 
 seed = 42
 
@@ -40,7 +42,6 @@ target_transform = Compose(
     ]
 )
 
-
 def main():
     parser = ArgumentParser()
     parser.add_argument(
@@ -58,19 +59,33 @@ def main():
     parser.add_argument('--num-workers', type=int, default=4)
     parser.add_argument('--batch-size', type=int, default=1)
     parser.add_argument('--cpu', action='store_true')
+    parser.add_argument('--method', default='maxlogits', choices=['maxlogits', 'msp', 'max_entropy'], 
+                        help="Anomaly scoring method: maxlogits, msp, or max_entropy")
     args = parser.parse_args()
+    
+    # --- Setup Structured Logging ---
+    timestamp = __import__('datetime').datetime.now().strftime("%Y%m%d_%H%M%S")
+    model_name = os.path.basename(args.loadWeights).replace('.pth', '')
+    experiment_id = f"{model_name}_{args.method}_{timestamp}"
+    results_dir = os.path.join(os.path.dirname(__file__), 'results_anomaly', experiment_id)
+    os.makedirs(results_dir, exist_ok=True)
+    
+    # Save parameters to config.json
+    import json
+    with open(os.path.join(results_dir, 'config.json'), 'w') as f:
+        json.dump(vars(args), f, indent=4)
+    # --------------------------------
+
     anomaly_score_list = []
     ood_gts_list = []
-
-    if not os.path.exists('results.txt'):
-        open('results.txt', 'w').close()
-    file = open('results.txt', 'a')
 
     modelpath = args.loadDir + args.loadModel
     weightspath = args.loadDir + args.loadWeights
 
     print ("Loading model: " + modelpath)
     print ("Loading weights: " + weightspath)
+    print ("Scoring method: " + args.method)
+    print (f"Results will be saved to: {results_dir}")
 
     model = ERFNet(NUM_CLASSES)
 
@@ -96,12 +111,34 @@ def main():
     
     for path in glob.glob(os.path.expanduser(str(args.input[0]))):
         print(path)
-        images = input_transform((Image.open(path).convert('RGB'))).unsqueeze(0).float().cuda()
-        # images = images.permute(0,3,1,2)
+        img = Image.open(path).convert('RGB')
+        images = input_transform(img).unsqueeze(0).float().cuda()
+        
         with torch.no_grad():
-            result = model(images)
-        anomaly_result = 1.0 - np.max(result.squeeze(0).data.cpu().numpy(), axis=0)            
-        pathGT = path.replace("images", "labels_masks").replace(".jpg", ".png").replace(".webp", ".png").replace(".jpg", ".png").replace(".jpg", ".png")                
+            # SINGLE FORWARD PASS
+            logits = model(images)
+            
+            if args.method == 'maxlogits':
+                # Original maxlogits logic: 1 - max(logits)
+                anomaly_result = 1.0 - torch.max(logits, dim=1)[0].cpu().numpy()[0]
+                
+            elif args.method == 'msp':
+                #MSP logic: 1 - max(softmax)
+                probs = F.softmax(logits, dim=1)
+                anomaly_result = 1.0 - torch.max(probs, dim=1)[0].cpu().numpy()[0]
+                
+            elif args.method == 'max_entropy':
+                # Entropy logic: Normalized entropy from baselines (taken from utilities.py)
+                probs = F.softmax(logits, dim=1)
+                entropy = torch.div(
+                    torch.sum(-probs * torch.log(probs + 1e-10), dim=1), 
+                    torch.log(torch.tensor(probs.shape[1], dtype=torch.float))
+                )
+                anomaly_result = entropy.cpu().numpy()[0]
+            else:
+                raise ValueError(f"Unknown method {args.method}")
+              
+        pathGT = path.replace("images", "labels_masks")                
         if "RoadObsticle21" in pathGT:
            pathGT = pathGT.replace("webp", "png")
         if "fs_static" in pathGT:
@@ -130,10 +167,13 @@ def main():
         else:
              ood_gts_list.append(ood_gts)
              anomaly_score_list.append(anomaly_result)
-        del result, anomaly_result, ood_gts, mask
+        if 'result' in locals(): del result
+        if 'anomaly_result' in locals(): del anomaly_result
+        if 'ood_gts' in locals(): del ood_gts
+        if 'mask' in locals(): del mask
         torch.cuda.empty_cache()
 
-    file.write( "\n")
+    
 
     ood_gts = np.array(ood_gts_list)
     anomaly_scores = np.array(anomaly_score_list)
@@ -156,8 +196,13 @@ def main():
     print(f'AUPRC score: {prc_auc*100.0}')
     print(f'FPR@TPR95: {fpr*100.0}')
 
-    file.write(('    AUPRC score:' + str(prc_auc*100.0) + '   FPR@TPR95:' + str(fpr*100.0) ))
-    file.close()
+    with open(os.path.join(results_dir, 'metrics.txt'), 'w') as f:
+        f.write(f"Experiment ID: {experiment_id}\n")
+        f.write(f"Scoring Method: {args.method}\n")
+        f.write(f"AUPRC score: {prc_auc*100.0}\n")
+        f.write(f"FPR@TPR95: {fpr*100.0}\n")
+    
+    print(f"Metrics successfully saved to {os.path.join(results_dir, 'metrics.txt')}")
 
 if __name__ == '__main__':
     main()

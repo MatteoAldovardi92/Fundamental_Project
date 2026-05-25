@@ -1,0 +1,4 @@
+Experiment ID: erfnet_pretrained_max_entropy_20260521_100206
+Scoring Method: max_entropy
+AUPRC score: 12.668527719053055
+FPR@TPR95: 82.74862138731258

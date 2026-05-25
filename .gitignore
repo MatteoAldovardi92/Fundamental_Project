@@ -214,3 +214,6 @@ eomt/eomt_weights/eomt_cityscapes.ckpt
 eomt/eomt_weights/eomt_coco.ckpt
 checkpoints/cityscapes_lora/eomt-lora-epoch=20-val_iou=0.00.ckpt
 checkpoints/cityscapes_lora/eomt-lora-epoch=21-val_iou=0.00.ckpt
+# Ignore datasets but keep .py files
+eval/Validation Dataset/*
+!eval/Validation Dataset/*.py
