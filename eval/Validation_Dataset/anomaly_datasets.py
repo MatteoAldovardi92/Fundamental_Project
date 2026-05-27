@@ -42,11 +42,7 @@ class BaseAnomalyDataset(Dataset):
         
         # Fishyscapes Lost & Found
         if "LostFound" in path or "LostAndFound" in path:
-            mapped = np.zeros_like(label_np)
-            mapped = np.where(label_np == 0, 255, mapped) # ignore
-            mapped = np.where(label_np == 1, 0, mapped)   # in-distribution
-            mapped = np.where((label_np > 1) & (label_np < 201), 1, mapped) # ood/anomaly
-            return mapped
+            return label_np
 
         # StreetHazard (if applicable)
         if "Streethazard" in path:

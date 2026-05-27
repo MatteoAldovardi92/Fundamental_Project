@@ -217,3 +217,30 @@ checkpoints/cityscapes_lora/eomt-lora-epoch=21-val_iou=0.00.ckpt
 # Ignore datasets but keep .py files
 eval/Validation Dataset/*
 !eval/Validation Dataset/*.py
+
+eval/Validation_Dataset/Anomaly_Validation_Datasets.zip
+eomt/data/gtFine_trainvaltest.zip
+eomt/data/leftImg8bit_trainvaltest.zip
+eomt/eomt_weights/eomt_coco.bin
+eomt/eomt_weights/eomt_cityscapes.bin
+eomt/eomt_weights/eomt_cityscapes.ckpt
+eomt/eomt_weights/eomt_coco.ckpt
+eomt/eomt_weights/eomt_cityscapes_lightning.ckpt
+eomt/eomt_weights/eomt_cityscapes_lightning_4096.ckpt
+checkpoints/cityscapes_lora/eomt-lora-epoch=20-val_iou=0.00.ckpt
+checkpoints/cityscapes_lora/eomt-lora-epoch=21-val_iou=0.00.ckpt
+checkpoints/cityscapes_enhanced/eomt-enhanced-epoch=08-val_iou_all=0.00.ckpt
+checkpoints/cityscapes_enhanced/eomt-enhanced-epoch=09-val_iou_all=0.00.ckpt
+checkpoints/cityscapes_enhanced/eomt-enhanced-epoch=01-val_iou_all=0.00.ckpt
+checkpoints/cityscapes_enhanced/eomt-enhanced-epoch=02-val_iou_all=0.00.ckpt
+checkpoints/cityscapes_enhanced/eomt-enhanced-epoch=00-val_iou_all=0.00.ckpt
+checkpoints/cityscapes_enhanced/eomt-enhanced-epoch=09-val_iou_all=0.00-v1.ckpt
+checkpoints/cityscapes_enhanced/eomt-enhanced-epoch=11-val_iou_all=0.00.ckpt
+checkpoints/cityscapes_enhanced/eomt-enhanced-epoch=00-val_iou_all=0.00-v1.ckpt
+checkpoints/cityscapes_enhanced/eomt-enhanced-epoch=00-val_iou_all=0.00-v2.ckpt
+checkpoints/cityscapes_enhanced/eomt-enhanced-epoch=01-val_iou_all=0.00-v1.ckpt
+checkpoints/cityscapes_enhanced/eomt-enhanced-epoch=02-val_iou_all=0.00-v1.ckpt
+checkpoints/cityscapes_enhanced/eomt-enhanced-epoch=00-val_iou_all=0.00-v3.ckpt
+checkpoints/cityscapes_enhanced/eomt-enhanced-epoch=01-val_iou_all=0.00-v2.ckpt
+checkpoints/cityscapes_enhanced/eomt-enhanced-epoch=21-val_iou_all=0.00.ckpt
+checkpoints/cityscapes_enhanced/eomt-enhanced-epoch=23-val_iou_all=0.00.ckpt

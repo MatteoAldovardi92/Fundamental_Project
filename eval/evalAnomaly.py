@@ -128,7 +128,7 @@ def main():
                 anomaly_result = 1.0 - torch.max(probs, dim=1)[0].cpu().numpy()[0]
                 
             elif args.method == 'max_entropy':
-                # Entropy logic: Normalized entropy from baselines (taken from utilities.py)
+                # Entropy logic: Normalized entropy from posthoc_metrics (taken from utilities.py)
                 probs = F.softmax(logits, dim=1)
                 entropy = torch.div(
                     torch.sum(-probs * torch.log(probs + 1e-10), dim=1), 
@@ -138,7 +138,7 @@ def main():
             else:
                 raise ValueError(f"Unknown method {args.method}")
               
-        pathGT = path.replace("images", "labels_masks")                
+        pathGT = path.replace("images", "labels_masks").replace(".jpg", ".png").replace(".webp", ".png")                
         if "RoadObsticle21" in pathGT:
            pathGT = pathGT.replace("webp", "png")
         if "fs_static" in pathGT:

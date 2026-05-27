@@ -1,0 +1,4 @@
+Experiment ID: erfnet_pretrained_maxlogits_20260526_175256
+Scoring Method: maxlogits
+AUPRC score: 15.581983299743523
+FPR@TPR95: 73.24763926329555

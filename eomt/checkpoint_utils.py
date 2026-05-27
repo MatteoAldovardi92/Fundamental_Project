@@ -1,4 +1,3 @@
-
 import os
 import torch
 import sys
@@ -102,3 +101,62 @@ if __name__ == "__main__":
         m = get_finetuned_model(CKPT)
     else:
         print(f"Please update the CKPT path in this script to point to your .ckpt file.")
+
+
+def get_eomt_cityscape(checkpoint_path, device='cuda'):
+    print("\n--- Initializing EoMT Cityscapes Architecture ---")
+    from eomt.models.vit import ViT
+    from eomt.models.eomt import EoMT
+    import torch
+    
+    encoder = ViT(img_size=(640, 640), backbone_name='vit_base_patch14_reg4_dinov2')
+    model = EoMT(
+        encoder=encoder,
+        num_classes=19,
+        num_q=100,
+        num_blocks=3,
+        masked_attn_enabled=True
+    )
+
+    print(f"Loading weights from: {checkpoint_path}")
+    checkpoint = torch.load(checkpoint_path, map_location=device, weights_only=False)
+    state_dict = checkpoint.get('state_dict', checkpoint)
+
+    new_state_dict = {}
+    for k, v in state_dict.items():
+        if k.startswith('network.'): k = k[len('network.'):]
+        elif k.startswith('model.'): k = k[len('model.'):]
+        new_state_dict[k] = v
+
+    model.load_state_dict(new_state_dict, strict=False)
+    model.to(device)
+    model.eval()
+    print("✅ EoMT Cityscapes Model ready for inference.")
+    return model
+
+def get_erfnet_model(checkpoint_path, device='cuda'):
+    print("\n--- Initializing ErfNet Architecture ---")
+    import torch
+    from eval.erfnet import ERFNet
+    
+    model = ERFNet(20)  # 20 classes for the pretrained checkpoint
+
+    print(f"Loading weights from: {checkpoint_path}")
+    checkpoint = torch.load(checkpoint_path, map_location=device, weights_only=False)
+    
+    if 'state_dict' in checkpoint:
+        state_dict = checkpoint['state_dict']
+    else:
+        state_dict = checkpoint
+        
+    # Handle 'module.' prefix from DataParallel
+    new_state_dict = {}
+    for k, v in state_dict.items():
+        name = k[7:] if k.startswith('module.') else k
+        new_state_dict[name] = v
+        
+    model.load_state_dict(new_state_dict, strict=False)
+    model.to(device)
+    model.eval()
+    print("✅ ErfNet Model ready for inference.")
+    return model
