@@ -1,6 +1,6 @@
 bias: none
-lora_alpha: 32
-lora_dropout: 0.05
-r: 16
+lora_alpha: 16
+lora_dropout: 0.1
+r: 8
 target_modules:
 - qkv
