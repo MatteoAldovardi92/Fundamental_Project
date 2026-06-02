@@ -1,0 +1,16 @@
+experiment_name: lora-decoder-blocks
+max_epochs: 10
+batch_size: 4
+accumulate_grad_batches: 4
+
+lr: 1.0e-4
+llrd: 0.9
+weight_decay: 0.05
+poly_power: 0.9
+warmup_steps: [125, 125]
+
+lora_r: 8
+lora_alpha: 16
+lora_target_modules: [qkv, fc1, fc2]
+lora_dropout: 0.05
+gradient_clip_val: 0.5

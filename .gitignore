@@ -244,3 +244,12 @@ checkpoints/cityscapes_enhanced/eomt-enhanced-epoch=00-val_iou_all=0.00-v3.ckpt
 checkpoints/cityscapes_enhanced/eomt-enhanced-epoch=01-val_iou_all=0.00-v2.ckpt
 checkpoints/cityscapes_enhanced/eomt-enhanced-epoch=21-val_iou_all=0.00.ckpt
 checkpoints/cityscapes_enhanced/eomt-enhanced-epoch=23-val_iou_all=0.00.ckpt
+# Ignore heavy checkpoints and datasets
+checkpoints/
+eomt/data/
+eomt/eomt_weights/
+lightning_logs/
+eval/Validation_Dataset/
+*.ckpt
+*.zip
+*.bin

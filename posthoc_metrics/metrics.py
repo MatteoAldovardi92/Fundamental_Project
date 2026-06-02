@@ -31,6 +31,6 @@ def compute_metrics(anomaly_scores, ground_truth):
     fpr95 = fpr[idx]
     
     return {
-        'auprc': auprc * 100.0,
-        'fpr95': fpr95 * 100.0
+        'auprc': auprc,
+        'fpr95': fpr95
     }
