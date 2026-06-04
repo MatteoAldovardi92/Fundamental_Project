@@ -32,9 +32,10 @@ def prepare_ground_truth(path_gt):
             ood_gts = np.where((ood_gts != 1), 0, ood_gts) # This might be wrong.
             # Let's stick to the exact logic from the previously found utils.py
             ood_gts = np.array(mask)
-            ood_gts = np.where((ood_gts == 2), 1, ood_gts)
-            ood_gts = np.where((ood_gts == 1), 0, ood_gts)
-            ood_gts = np.where((ood_gts == 0), 0, ood_gts)
+            result = np.zeros_like(ood_gts)          # default: normal (0)
+            result[ood_gts == 2] = 1                 # anomaly
+            result[ood_gts == 0] = 255               # void/ignore
+            ood_gts = result
 
     if "LostAndFound" in path_gt or "FS_LostFound" in path_gt:
         # 0: ignore, 1: in-distribution, 2+: anomaly
