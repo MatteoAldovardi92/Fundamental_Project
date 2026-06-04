@@ -10,7 +10,7 @@ def get_pixel_msp(logits, temperature=1.0):
     """Maximum Softmax Probability (with slicing trick)"""
     # If 20 channels, slice to 19 to ignore the 'Void' class during OOD detection
     if logits.shape[1] == 20:
-        logits = logits[:, :19, :, :]
+        logits = logits[:, 1:, :, :]
     probs = F.softmax(logits / temperature, dim=1)
     max_probs, _ = torch.max(probs, dim=1)
     return 1.0 - max_probs
@@ -18,14 +18,14 @@ def get_pixel_msp(logits, temperature=1.0):
 def get_pixel_max_logit(logits):
     """Maximum Logit (with slicing trick)"""
     if logits.shape[1] == 20:
-        logits = logits[:, :19, :, :]
+        logits = logits[:, 1:, :, :]
     max_logits, _ = torch.max(logits, dim=1)
     return -max_logits
 
 def get_pixel_entropy(logits, temperature=1.0):
     """Maximum Entropy (with slicing trick)"""
     if logits.shape[1] == 20:
-        logits = logits[:, :19, :, :]
+        logits = logits[:, 1:, :, :]
     probs = F.softmax(logits / temperature, dim=1)
     entropy = -torch.sum(probs * torch.log(probs + 1e-7), dim=1)
     num_classes = logits.shape[1]

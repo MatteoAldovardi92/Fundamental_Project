@@ -1,0 +1,59 @@
+# ==============================================================================
+# Optimal LoRA Configuration for EoMT Cityscapes Fine-Tuning
+# ==============================================================================
+experiment_name: "exp_optimal_full_lora"
+
+# ------------------------------------------------------------------------------
+# 1. Hardware & Batching
+# ------------------------------------------------------------------------------
+max_epochs: 10
+batch_size: 4                  # Fits comfortably on Colab A100/T4 (640x640 images)
+accumulate_grad_batches: 4     # 4 * 4 = 16 Effective Batch Size (matches paper)
+
+# ------------------------------------------------------------------------------
+# 2. Optimization Strategy
+# ------------------------------------------------------------------------------
+# Base Learning Rate for the fresh heads and top-layer (Block 11) adapters.
+lr: 1.0e-4
+
+# Layer-wise Learning Rate Decay. 0.9 gives a gentle ~3x spread from Block 11 
+# down to Block 0, protecting pre-trained features.
+llrd: 0.9
+
+# AdamW weight decay. (Your code now correctly excludes 1D biases/norms from this).
+weight_decay: 0.05
+
+# Gradient Clipping. Loosened to 0.05 to allow the LoRA adapters to learn, 
+# while still providing a safety net against exploding gradients.
+gradient_clip_val: 0.05
+
+# ------------------------------------------------------------------------------
+# 3. Two-Stage Warmup ("Shock Protection")
+# ------------------------------------------------------------------------------
+# Total optimizer steps = (2975 images / 16 effective batch size) * 10 epochs = 1860
+# [125, 125] corresponds to ~13.4% of total steps, which is perfectly balanced.
+# - Stage 1 (125 steps): Head warms up, Backbone is strictly frozen.
+# - Stage 2 (125 steps): Head decays, Backbone ramps up linearly.
+warmup_steps: [125, 125]
+poly_power: 0.9                # Standard polynomial decay curve exponent
+
+# ------------------------------------------------------------------------------
+# 4. LoRA Adapter Architecture
+# ------------------------------------------------------------------------------
+# We use Rank 16 here instead of 8 to give the model slightly more capacity 
+# for the domain shift from COCO to Cityscapes.
+lora_r: 16
+
+# Alpha determines the scaling factor. Alpha = 2 * r is the theoretical 
+# sweet spot to maintain a consistent signal-to-noise ratio.
+lora_alpha: 32
+
+# Mild regularization to prevent overfitting on the small (~3k) dataset.
+lora_dropout: 0.05
+
+# Target modules: Attaching to Attention (qkv) and MLPs (fc1, fc2) yields 
+# the best parameter-to-performance ratio in Vision Transformers.
+lora_target_modules:
+  - "qkv"
+  - "fc1"
+  - "fc2"

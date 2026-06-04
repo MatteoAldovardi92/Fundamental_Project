@@ -253,3 +253,27 @@ eval/Validation_Dataset/
 *.ckpt
 *.zip
 *.bin
+
+# Ignore large files and datasets
+*.zip
+*.ckpt
+*.bin
+
+# Ignore heavy directories
+checkpoints/
+lightning_logs/
+eomt/data/
+eomt/eomt_weights/
+eval/Validation_Dataset/
+
+# Ignore large files and datasets
+*.zip
+*.ckpt
+*.bin
+
+# Ignore heavy directories
+checkpoints/
+lightning_logs/
+eomt/data/
+eomt/eomt_weights/
+eval/Validation_Dataset/
