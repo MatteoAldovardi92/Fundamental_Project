@@ -49,8 +49,8 @@ attn_mask_annealing_end_steps:   [744, 1302, 1860]
 # ------------------------------------------------------------------------------
 # 5. Model Capacity
 # ------------------------------------------------------------------------------
-# 100 queries matches the official EoMT Cityscapes semantic config (vs 200 for COCO).
-num_q: 100
+# 200 queries matches the COCO checkpoint shape — changing this causes a RuntimeError in load_state_dict (shape mismatch on network.q.weight even with strict=False).
+num_q: 200
 
 # ------------------------------------------------------------------------------
 # 6. LoRA Adapter Architecture
