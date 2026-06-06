@@ -28,6 +28,8 @@ class MaskClassificationLoRA(MaskClassificationSemantic):
         # Parent loads the COCO checkpoint and builds the network.
         super().__init__(**kwargs)
 
+        self.save_hyperparameters(ignore=["network"])
+
         from peft import LoraConfig, get_peft_model
 
         lora_cfg = LoraConfig(
