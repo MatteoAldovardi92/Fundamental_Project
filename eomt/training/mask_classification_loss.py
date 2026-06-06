@@ -115,6 +115,7 @@ class MaskClassificationLoss(Mask2FormerLoss):
             else:
                 loss_total = torch.add(loss_total, weighted_loss)
 
-        log_fn("losses/train_loss_total", loss_total, sync_dist=True, prog_bar=True)
+        log_fn("losses/train_loss_total", loss_total, sync_dist=True, prog_bar=True,
+               on_step=True, on_epoch=True)
 
         return loss_total  # type: ignore
