@@ -9,8 +9,11 @@ weight_decay: 0.05
 poly_power: 0.9
 warmup_steps: [200, 200]
 
+# LoRA adapter architecture — adapters are injected into the full backbone,
+# but trainable_blocks=range(9, 12) in the notebook freezes blocks 0–8 and
+# leaves only the last 3 encoder blocks' adapters trainable, alongside the heads.
 lora_r: 8
 lora_alpha: 16
-lora_target_modules: [qkv, fc1, fc2]
+lora_target_modules: ['qkv', 'fc1', 'fc2']
 lora_dropout: 0.05
 gradient_clip_val: 0.5

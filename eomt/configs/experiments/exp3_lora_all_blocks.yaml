@@ -9,8 +9,11 @@ weight_decay: 0.05
 poly_power: 0.9
 warmup_steps: [200, 200]
 
+# LoRA adapter architecture — adapters are injected into the full backbone
+# and trainable_blocks=range(12) in the notebook keeps all 12 encoder blocks'
+# adapters trainable. This is the maximum LoRA capacity configuration.
 lora_r: 8
 lora_alpha: 16
-lora_target_modules: [qkv, fc1, fc2]
+lora_target_modules: ['qkv', 'fc1', 'fc2']
 lora_dropout: 0.05
 gradient_clip_val: 0.5

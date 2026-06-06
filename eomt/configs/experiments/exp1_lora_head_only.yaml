@@ -9,8 +9,12 @@ weight_decay: 0.05
 poly_power: 0.9
 warmup_steps: [200, 200]
 
+# LoRA adapter architecture — adapters are always injected into the full backbone
+# by MaskClassificationLoRA, but trainable_blocks=[] in the notebook freezes ALL
+# of them. Only the fresh decoder heads are actually trained in this experiment.
+# ('qkv', 'fc1', 'fc2' are quoted for clarity; unquoted is equally valid in YAML)
 lora_r: 8
 lora_alpha: 16
-lora_target_modules: [qkv, fc1, fc2]
+lora_target_modules: ['qkv', 'fc1', 'fc2']
 lora_dropout: 0.05
 gradient_clip_val: 0.5
