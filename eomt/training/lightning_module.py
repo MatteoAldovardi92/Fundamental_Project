@@ -613,11 +613,10 @@ class LightningModule(lightning.LightningModule):
         for i in range(len(imgs)):
             img = imgs[i]
             new_h, new_w = self.scale_img_size_semantic(img.shape[-2:])
-            pil_img = Image.fromarray(img.permute(1, 2, 0).cpu().numpy())
-            resized_img = pil_img.resize((new_w, new_h), Image.BILINEAR)
-            resized_img = (
-                torch.from_numpy(np.array(resized_img)).permute(2, 0, 1).to(img.device)
-            )
+            resized_img = torch.nn.functional.interpolate(
+                img.unsqueeze(0).float(), size=(new_h, new_w),
+                mode="bilinear", align_corners=False,
+            ).squeeze(0).to(img.dtype)
 
             num_crops = math.ceil(max(resized_img.shape[-2:]) / min(self.img_size))
             overlap = num_crops * min(self.img_size) - max(resized_img.shape[-2:])
