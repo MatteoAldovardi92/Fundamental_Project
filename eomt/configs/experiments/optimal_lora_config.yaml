@@ -16,14 +16,14 @@ accumulate_grad_batches: 4     # 4 * 4 = 16 Effective Batch Size (matches paper)
 # Base Learning Rate for the fresh heads and top-layer (Block 11) adapters.
 lr: 1.0e-4
 
-# Layer-wise Learning Rate Decay. 0.9 gives a gentle ~3x spread from Block 11 
+# Layer-wise Learning Rate Decay. 0.9 gives a gentle ~3x spread from Block 11
 # down to Block 0, protecting pre-trained features.
 llrd: 0.9
 
-# AdamW weight decay. (Your code now correctly excludes 1D biases/norms from this).
+# AdamW weight decay. (Correctly excludes 1D biases/norms from this).
 weight_decay: 0.05
 
-# Gradient Clipping. Loosened to 0.05 to allow the LoRA adapters to learn, 
+# Gradient Clipping. Loosened to 0.05 to allow the LoRA adapters to learn,
 # while still providing a safety net against exploding gradients.
 gradient_clip_val: 0.05
 
@@ -38,22 +38,42 @@ warmup_steps: [125, 125]
 poly_power: 0.9                # Standard polynomial decay curve exponent
 
 # ------------------------------------------------------------------------------
-# 4. LoRA Adapter Architecture
+# 4. Attention Mask Annealing
 # ------------------------------------------------------------------------------
-# We use Rank 16 here instead of 8 to give the model slightly more capacity 
-# for the domain shift from COCO to Cityscapes.
+# Mirrors the EoMT Cityscapes training schedule at proportions 20/40/50/70/80/100%
+# of total steps. Computed for 10 epochs × 186 optimizer steps/epoch = 1860 total.
+attn_mask_annealing_enabled: true
+attn_mask_annealing_start_steps: [372, 930, 1488]
+attn_mask_annealing_end_steps:   [744, 1302, 1860]
+
+# ------------------------------------------------------------------------------
+# 5. Model Capacity
+# ------------------------------------------------------------------------------
+# 100 queries matches the official EoMT Cityscapes semantic config (vs 200 for COCO).
+num_q: 100
+
+# ------------------------------------------------------------------------------
+# 6. LoRA Adapter Architecture
+# ------------------------------------------------------------------------------
+# Rank 16 gives the model more capacity for the COCO → Cityscapes domain shift.
 lora_r: 16
 
-# Alpha determines the scaling factor. Alpha = 2 * r is the theoretical 
-# sweet spot to maintain a consistent signal-to-noise ratio.
+# Alpha = 2 * r is the theoretical sweet spot for signal-to-noise ratio.
 lora_alpha: 32
 
 # Mild regularization to prevent overfitting on the small (~3k) dataset.
 lora_dropout: 0.05
 
-# Target modules: Attaching to Attention (qkv) and MLPs (fc1, fc2) yields 
-# the best parameter-to-performance ratio in Vision Transformers.
+# qkv: query/key/value projections. proj: attention output projection.
+# fc1/fc2: MLP layers. Together these cover all representational capacity in ViT.
 lora_target_modules:
   - "qkv"
+  - "proj"
   - "fc1"
   - "fc2"
+
+# ------------------------------------------------------------------------------
+# 7. Data Augmentation
+# ------------------------------------------------------------------------------
+# Gaussian blur (p=0.5) addresses the sharpness distribution shift COCO → Cityscapes.
+gaussian_blur_enabled: true
