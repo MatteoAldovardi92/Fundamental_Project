@@ -183,7 +183,6 @@ cython_debug/
 *.bin
 *.ckpt
 data/
-datasets/
 __pycache__/
 .ipynb_checkpoints/
 
