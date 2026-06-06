@@ -23,7 +23,7 @@ class CityscapesSemantic(LightningDataModule):
         img_size: tuple[int, int] = (1024, 1024),
         num_classes: int = 19,
         color_jitter_enabled=True,
-        scale_range=(0.5, 2.0),
+        scale_range=(0.5, 1.5),
         gaussian_blur_enabled: bool = False,
         grayscale_prob: float = 0.0,
         check_empty_targets=True,

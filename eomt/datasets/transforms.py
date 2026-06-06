@@ -42,7 +42,7 @@ class Transforms(nn.Module):
 
         # Pixel-only augmentations — do NOT affect masks or spatial dims.
         self.random_blur = (
-            T.RandomApply([T.GaussianBlur(kernel_size=23, sigma=(0.1, 2.0))], p=0.5)
+            T.RandomApply([T.GaussianBlur(kernel_size=13, sigma=(0.1, 2.0))], p=0.5)
             if gaussian_blur_enabled else None
         )
         self.random_grayscale = T.RandomGrayscale(p=grayscale_prob) if grayscale_prob > 0 else None
