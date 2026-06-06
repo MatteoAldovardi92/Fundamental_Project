@@ -276,3 +276,8 @@ lightning_logs/
 eomt/data/
 eomt/eomt_weights/
 eval/Validation_Dataset/
+
+# Colab symlinks (created by os.symlink in setup cells)
+FundGitHubProject
+ProjectFolder
+/content
