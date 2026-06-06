@@ -42,7 +42,7 @@ poly_power: 0.9                # Standard polynomial decay curve exponent
 # ------------------------------------------------------------------------------
 # Mirrors the EoMT Cityscapes training schedule at proportions 20/40/50/70/80/100%
 # of total steps. Computed for 10 epochs × 186 optimizer steps/epoch = 1860 total.
-attn_mask_annealing_enabled: true
+attn_mask_annealing_enabled: false  # disabled: masked_attn_enabled=False in build_lora_model
 attn_mask_annealing_start_steps: [372, 930, 1488]
 attn_mask_annealing_end_steps:   [744, 1302, 1860]
 

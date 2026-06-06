@@ -12,7 +12,7 @@ warmup_steps: [200, 200]
 # ── Attention mask annealing ──────────────────────────────────────────────────
 # Proportions mirror the original EoMT Cityscapes config (20/40/50/70/80/100%).
 # Computed for 25 epochs × 186 optimizer steps/epoch = 4650 total steps.
-attn_mask_annealing_enabled: true
+attn_mask_annealing_enabled: false  # disabled: masked_attn_enabled=False in build_lora_model
 attn_mask_annealing_start_steps: [930, 2325, 3720]
 attn_mask_annealing_end_steps:   [1860, 3255, 4650]
 
