@@ -169,8 +169,11 @@ class LightningModule(lightning.LightningModule):
         }
 
     def forward(self, imgs):
-        x = imgs / 255.0
-
+        # Training path: imgs is float32 [0,1] — already normalised in
+        # Transforms.forward (single conversion on the 640×640 crop).
+        # Eval path (eval_collate, window_imgs_semantic): imgs is uint8
+        # [0,255] — no transforms applied, so we divide here.
+        x = imgs if imgs.is_floating_point() else imgs.float() / 255.0
         return self.network(x)
 
     def training_step(self, batch, batch_idx):

@@ -112,6 +112,14 @@ class Transforms(nn.Module):
 
         target = self._filter(target, ~target["is_crowd"])
 
+        # Convert to float32 [0,1] once here so every subsequent transform
+        # (color jitter, blur, scale jitter) works in float32 without
+        # repeated uint8→float32→uint8 round-trips on the full 1024×2048
+        # image. wrap() preserves the tv_tensors.Image type so spatial
+        # transforms (scale_jitter, random_crop) still handle image vs mask
+        # interpolation correctly.
+        img = wrap(img.float() / 255.0, like=img)
+
         img = self.color_jitter(img)
         if self.random_blur is not None:
             img = self.random_blur(img)
