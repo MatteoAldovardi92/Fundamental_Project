@@ -29,7 +29,7 @@ lora_r: 8
 lora_alpha: 16
 lora_target_modules: ['qkv', 'proj', 'fc1', 'fc2']
 lora_dropout: 0.05
-gradient_clip_val: 0.5
+gradient_clip_val: 1.0
 
 # ── Data augmentation ─────────────────────────────────────────────────────────
 # Gaussian blur (p=0.5) addresses the sharpness distribution shift COCO → Cityscapes.

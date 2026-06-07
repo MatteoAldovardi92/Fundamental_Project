@@ -23,9 +23,9 @@ llrd: 0.9
 # AdamW weight decay. (Correctly excludes 1D biases/norms from this).
 weight_decay: 0.05
 
-# Gradient Clipping. Loosened to 0.05 to allow the LoRA adapters to learn,
-# while still providing a safety net against exploding gradients.
-gradient_clip_val: 0.05
+# Gradient Clipping. 0.5 lets fresh heads and all-block LoRA adapters move freely
+# while protecting Adam's second-moment state from early spikes.
+gradient_clip_val: 0.5
 
 # ------------------------------------------------------------------------------
 # 3. Two-Stage Warmup ("Shock Protection")

@@ -56,11 +56,19 @@ class MaskClassificationLoRA(MaskClassificationSemantic):
         
         self.network.encoder.print_trainable_parameters()
 
+    def init_metrics_semantic(self, ignore_idx, num_blocks):
+        # LoRA fine-tuning tracks only loss — skip mIoU metric objects entirely
+        # to avoid the extra Lightning metric-sweep progress bar during validation.
+        self.metrics = nn.ModuleList()
+
     def validation_step(self, batch, batch_idx=0):
         imgs, targets = batch
         batch_size = len(imgs)
         mask_logits_per_block, class_logits_per_block = self(imgs)
+
         val_loss = None
+        val_mask = val_dice = val_ce = None
+
         for mask_logits, class_logits in zip(mask_logits_per_block, class_logits_per_block):
             losses = self.criterion(
                 masks_queries_logits=mask_logits,
@@ -70,18 +78,25 @@ class MaskClassificationLoRA(MaskClassificationSemantic):
             for loss_key, loss in losses.items():
                 if "mask" in loss_key:
                     w = loss * self.criterion.mask_coefficient
+                    val_mask = w if val_mask is None else val_mask + w
                 elif "dice" in loss_key:
                     w = loss * self.criterion.dice_coefficient
+                    val_dice = w if val_dice is None else val_dice + w
                 elif "cross_entropy" in loss_key:
                     w = loss * self.criterion.class_coefficient
+                    val_ce = w if val_ce is None else val_ce + w
                 else:
                     continue
                 val_loss = w if val_loss is None else val_loss + w
-        self.log("losses/val_loss_total", val_loss, on_step=False, on_epoch=True,
-                 sync_dist=True, prog_bar=True, batch_size=batch_size)
+
+        log_kwargs = dict(on_step=False, on_epoch=True, sync_dist=True, batch_size=batch_size)
+        self.log("losses/val_loss_total",       val_loss, prog_bar=True, **log_kwargs)
+        self.log("losses/val_loss_mask",         val_mask,               **log_kwargs)
+        self.log("losses/val_loss_dice",         val_dice,               **log_kwargs)
+        self.log("losses/val_cross_entropy",     val_ce,                 **log_kwargs)
 
     def on_validation_epoch_end(self):
-        pass  # no mIoU during fine-tuning; loss is logged per-step above
+        pass
 
     def on_validation_end(self):
         pass
