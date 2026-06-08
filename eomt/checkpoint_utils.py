@@ -43,12 +43,13 @@ def get_finetuned_model(checkpoint_path, device='cuda'):
     )
 
     # 3. Apply LoRA Surgery
-    # This ensures the model keys (lora_A/B) match the checkpoint keys.
+    # target_modules must match exactly what was used in Step 5 training
+    # (exp3_lora_all_blocks.yaml: qkv, proj, fc1, fc2).
+    # masked_attn_enabled=False must also match — training never enabled it.
     lora_config = LoraConfig(
         r=CONFIG['lora_r'],
         lora_alpha=CONFIG['lora_alpha'],
-        target_modules=['qkv', 'fc1', 'fc2'],
-        modules_to_save=['class_head', 'mask_head'],
+        target_modules=['qkv', 'proj', 'fc1', 'fc2'],
         lora_dropout=0.05,
         bias='none',
     )
@@ -60,7 +61,7 @@ def get_finetuned_model(checkpoint_path, device='cuda'):
         num_classes=CONFIG['num_classes'],
         num_q=CONFIG['num_q'],
         num_blocks=CONFIG['num_blocks'],
-        masked_attn_enabled=True
+        masked_attn_enabled=False   # must match Step 5 training config
     )
 
     # 5. Load the Weights
