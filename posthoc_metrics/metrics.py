@@ -24,7 +24,7 @@ def compute_metrics(anomaly_scores, ground_truth):
         return {'auprc': 0.0, 'fpr95': 1.0}
 
     # datasets use 0=anomaly, 1=normal — invert to match sklearn convention
-    labels = 1 - labels
+    #labels = 1 - labels
 
     auprc = average_precision_score(labels, scores)
     

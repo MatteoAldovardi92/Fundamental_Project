@@ -281,3 +281,6 @@ eval/Validation_Dataset/
 FundGitHubProject
 ProjectFolder
 /content
+best_eval_checkpoints/
+*.gdoc
+*.gsheet

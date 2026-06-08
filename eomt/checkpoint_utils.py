@@ -108,7 +108,8 @@ def get_eomt_cityscape(checkpoint_path, device='cuda'):
     from eomt.models.vit import ViT
     from eomt.models.eomt import EoMT
     import torch
-    
+    import torch.nn.functional as F
+
     encoder = ViT(img_size=(640, 640), backbone_name='vit_base_patch14_reg4_dinov2')
     model = EoMT(
         encoder=encoder,
@@ -127,6 +128,22 @@ def get_eomt_cityscape(checkpoint_path, device='cuda'):
         if k.startswith('network.'): k = k[len('network.'):]
         elif k.startswith('model.'): k = k[len('model.'):]
         new_state_dict[k] = v
+
+    # Interpolate pos_embed if size mismatch
+    if 'encoder.backbone.pos_embed' in new_state_dict:
+        pos_embed_checkpoint = new_state_dict['encoder.backbone.pos_embed']
+        pos_embed_model = model.encoder.backbone.pos_embed
+        if pos_embed_checkpoint.shape != pos_embed_model.shape:
+            print(f"  Interpolating pos_embed: {pos_embed_checkpoint.shape} → {pos_embed_model.shape}")
+            # shapes are [1, N, D] — interpolate along sequence dimension
+            N_ckpt = pos_embed_checkpoint.shape[1]
+            N_model = pos_embed_model.shape[1]
+            D = pos_embed_checkpoint.shape[2]
+            h = w = int(N_ckpt ** 0.5)
+            h_new = w_new = int(N_model ** 0.5)
+            pos_embed_checkpoint = pos_embed_checkpoint.reshape(1, h, w, D).permute(0, 3, 1, 2)
+            pos_embed_checkpoint = F.interpolate(pos_embed_checkpoint, size=(h_new, w_new), mode='bicubic', align_corners=False)
+            new_state_dict['encoder.backbone.pos_embed'] = pos_embed_checkpoint.permute(0, 2, 3, 1).reshape(1, N_model, D)
 
     model.load_state_dict(new_state_dict, strict=False)
     model.to(device)
@@ -159,4 +176,35 @@ def get_erfnet_model(checkpoint_path, device='cuda'):
     model.to(device)
     model.eval()
     print("✅ ErfNet Model ready for inference.")
+    return model
+
+def get_eomt_coco(checkpoint_path, device='cuda'):
+    print("\n--- Initializing EoMT COCO Architecture ---")
+    from eomt.models.vit import ViT
+    from eomt.models.eomt import EoMT
+    import torch
+    
+    encoder = ViT(img_size=(640, 640), backbone_name='vit_base_patch14_reg4_dinov2')
+    model = EoMT(
+        encoder=encoder,
+        num_classes=133,
+        num_q=200,
+        num_blocks=3,
+        masked_attn_enabled=True
+    )
+
+    print(f"Loading weights from: {checkpoint_path}")
+    checkpoint = torch.load(checkpoint_path, map_location=device, weights_only=False)
+    state_dict = checkpoint.get('state_dict', checkpoint)
+
+    new_state_dict = {}
+    for k, v in state_dict.items():
+        if k.startswith('network.'): k = k[len('network.'):]
+        elif k.startswith('model.'): k = k[len('model.'):]
+        new_state_dict[k] = v
+
+    model.load_state_dict(new_state_dict, strict=False)
+    model.to(device)
+    model.eval()
+    print("✅ EoMT COCO Model ready for inference.")
     return model

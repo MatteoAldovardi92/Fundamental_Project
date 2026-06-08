@@ -30,17 +30,14 @@ def cache_model_outputs(model, dataloader, cache_dir, device='cuda'):
             torch.save(data, os.path.join(cache_dir, f"sample_{i}.pt"))
 
 def fast_temperature_search(cache_dir, scoring_fn=None, temperatures=[0.5, 0.75, 1.0, 1.1, 1.5]):
-    """
-    Step 2: Loop over temperatures using ONLY the saved tensors.
-    This part takes seconds instead of hours.
-    """
     from posthoc_metrics import get_mask_msp, compute_metrics
+    import numpy as np
 
     if scoring_fn is None:
         scoring_fn = get_mask_msp
 
-    results = {T: {'auprc': [], 'fpr95': []} for T in temperatures}
-    cache_files = [f for f in os.listdir(cache_dir) if f.endswith('.pt')]
+    results = {}
+    cache_files = sorted(f for f in os.listdir(cache_dir) if f.endswith('.pt'))
 
     for T in temperatures:
         print(f"Testing Temperature T={T}...")
@@ -49,18 +46,23 @@ def fast_temperature_search(cache_dir, scoring_fn=None, temperatures=[0.5, 0.75,
 
         for file in cache_files:
             data = torch.load(os.path.join(cache_dir, file), map_location='cpu')
-
-            # Fast computation on cached logits
             anomaly_map = scoring_fn(data['mask_cls'], data['mask_pred'], temperature=T)
+            gt = data['gt']
+
+            # Upsample score to GT resolution if needed
+            if anomaly_map.shape[-2:] != gt.shape[-2:]:
+                anomaly_map = torch.nn.functional.interpolate(
+                    anomaly_map.unsqueeze(1),
+                    size=gt.shape[-2:],
+                    mode='bilinear',
+                    align_corners=False
+                ).squeeze(1)
 
             all_scores.append(anomaly_map.flatten().numpy())
-            all_gts.append(data['gt'].flatten().numpy())
+            all_gts.append(gt.flatten().numpy())
 
-        # Compute aggregate metrics for this temperature
-        import numpy as np
         metrics = compute_metrics(np.concatenate(all_scores), np.concatenate(all_gts))
-        print(f"  T={T} -> AuPRC: {metrics['auprc']:.2f} | FPR95: {metrics['fpr95']:.2f}")
+        print(f"  T={T} -> AuPRC: {metrics['auprc']:.4f} | FPR95: {metrics['fpr95']:.4f}")
         results[T] = metrics
 
     return results
-
