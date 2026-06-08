@@ -89,3 +89,23 @@ This command evaluates the same `EoMT-L` model using 4 GPUs with a batch size of
 🔧 Replace `/path/to/pytorch_model.bin` with the path to the checkpoint to evaluate.
 
 A [notebook](inference.ipynb) is available for quick inference and visualization with auto-downloaded pre-trained models.
+
+---
+
+## Project Fine-Tuning (Step 5)
+
+LoRA fine-tuning on Cityscapes is handled by `training/mask_classification_lora.py` via `MaskClassificationLoRA`, which extends `MaskClassificationSemantic`. Three experiments are defined in `configs/experiments/`:
+
+| Config | Trainable components | `gradient_clip_val` |
+|---|---|---|
+| `exp1_lora_head_only.yaml` | Decoder heads only | 1.0 |
+| `exp2_lora_decoder_blocks.yaml` | Heads + LoRA blocks 9–11 | 1.0 |
+| `exp3_lora_all_blocks.yaml` | Heads + LoRA all 12 blocks | 0.5 |
+
+All experiments share: `lr=1e-4`, `llrd=0.9`, `weight_decay=0.05`, `warmup_steps=[200,200]`, `poly_power=0.9`, `lora_r=8`, `lora_alpha=16`, `batch_size=4`, `accumulate_grad_batches=4` (effective batch 16), `max_epochs=25`.
+
+Training is monitored via WandB (`eomt-cityscapes-finetuning` project). Logged metrics:
+- `losses/train_loss_total`, `train_loss_mask`, `train_loss_dice`, `train_cross_entropy` (step + epoch)
+- `losses/val_loss_total`, `val_loss_mask`, `val_loss_dice`, `val_cross_entropy` (epoch)
+
+Checkpoints saved to `checkpoints/<experiment_name>/` — top-2 by `val_loss_total` + `last.ckpt`.

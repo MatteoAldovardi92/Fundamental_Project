@@ -1,4 +1,47 @@
-# Anomaly Segmentation Eval
+# eval/
+
+Evaluation scripts for segmentation and anomaly detection.
+
+## Files
+
+| File | Description |
+|---|---|
+| `iouEval.py` | Fast per-class IoU accumulator — used in Step 4 and Step 5 `evaluate_miou` |
+| `erfnet.py` / `erfnet_nobn.py` | ERFNet architecture (pixel-based baseline, Step 7) |
+| `evalAnomaly.py` | Standalone anomaly eval script for ERFNet (original, CLI-based) |
+| `eomt_anomaly_eval.py` | Anomaly eval adapted for EoMT mask-based outputs |
+| `eval_iou.py` | CLI IoU evaluation on Cityscapes val/train |
+| `eval_cityscapes_color.py` | Saves colorized Cityscapes predictions for visualization |
+| `eval_cityscapes_server.py` | Converts predictions to Cityscapes server format |
+| `eval_forwardTime.py` | Measures model forward-pass time |
+| `dataset.py` / `transform.py` | Dataset and transform helpers for ERFNet eval |
+
+## Anomaly datasets (Steps 7–8)
+
+Validation datasets must be downloaded separately and placed under `eval/Validation_Dataset/`:
+
+```
+eval/Validation_Dataset/
+├── RoadAnomaly21/
+├── RoadObstacle21/
+├── FS_LostFound_full/
+├── fs_static/
+└── RoadAnomaly/
+```
+
+Download link: https://drive.google.com/file/d/1zcayoIIJztxKuHOIjmSjGoQBDy4RdETr/view
+
+## Label convention (anomaly masks)
+
+| Value | Meaning |
+|---|---|
+| 0 | In-distribution (normal) |
+| 1 | Anomaly |
+| 255 | Ignore |
+
+`RoadAnomaly` (non-21) uses `2` for anomaly — remapped to `1` before metric computation.
+
+---
 
 In this folder you can find some functions to evaluate your model's output. It is designed to load the ERFNet checkpoint so you need to change it when evaluating the EoMT model. The main function to look for is evalAnomaly.py that produces the Anomaly Segmentation results. Other functions could be useful for extensions.
 
