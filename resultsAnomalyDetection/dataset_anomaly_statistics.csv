@@ -1,0 +1,6 @@
+Dataset,Images with Anomalies,Mean Anomaly (%),Median Anomaly (%),Min Anomaly (%),Max Anomaly (%),<0.1% Anomaly Images,<1% Anomaly Images
+SMIYC RA-21,10/10,14.758,9.568,1.687,36.758,0,0
+SMIYC RO-21,30/30,0.721,0.292,0.01,5.357,7,23
+FS L&F,99/100,0.281,0.071,0.001,2.36,57,91
+FS Static,20/30,2.065,1.663,0.613,4.729,0,5
+Road Anomaly,59/60,9.679,6.602,0.375,42.329,0,6

@@ -284,3 +284,17 @@ ProjectFolder
 best_eval_checkpoints/
 *.gdoc
 *.gsheet
+
+
+# --- User Requested Exceptions ---
+!saved_visualizations/
+!ResultAnomalyDetection/
+!best_eval_checkpoints/
+!best_eval_checkpoints/*.csv
+
+
+# --- User Requested Exceptions ---
+!saved_visualizations/
+!resultsAnomalyDetection/
+!best_eval_checkpoints/
+!best_eval_checkpoints/*.csv
