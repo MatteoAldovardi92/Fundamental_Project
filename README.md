@@ -10,9 +10,7 @@ This repository contains the consolidated and optimized codebase for cross-task 
 - **`/trained_models`**: Pre-trained and fine-tuned model weights (large files are git-ignored; back up to Google Drive).
 - **`/best_eval_checkpoints`**: Best checkpoints selected after evaluation (git-ignored).
 - **`/docs`**: Static files and HTML for the project's documentation and web presentation.
-- **`/coco-classes-mapping-master`**: Tools and JSON mapping files used to translate COCO classes between the 80-class and 91-class formats.
-- **`/gitfunctions`**: Utility scripts to help manage Git operations within Colab.
-- **`/posthoc_metrics`**: Post-hoc metric computations and analysis scripts.
+- **`/coco-classes-mapping-master`**: Tools and JSON mapping files used to translate COCO classes between the 80-class and 91-class formats.- **`/posthoc_metrics`**: Post-hoc metric computations and analysis scripts.
 - **`/resultsAnomalyDetection`**: Saved results from anomaly detection evaluation runs.
 - **`/saved_visualizations`**: Saved output visualizations from inference and evaluation.
 
