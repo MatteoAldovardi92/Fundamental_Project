@@ -1,7 +1,7 @@
 experiment_name: lora-head-only
 max_epochs: 25
 batch_size: 4
-accumulate_grad_batches: 4
+accumulate_grad_batches: 4  # effective batch = 16
 
 lr: 1.0e-4
 llrd: 0.9
@@ -9,28 +9,27 @@ weight_decay: 0.05
 poly_power: 0.9
 warmup_steps: [200, 200]
 
-# ── Attention mask annealing ──────────────────────────────────────────────────
+# --- Attention mask annealing ---
 # Proportions mirror the original EoMT Cityscapes config (20/40/50/70/80/100%).
-# Computed for 25 epochs × 186 optimizer steps/epoch = 4650 total steps.
+# Step counts: 25 epochs × 186 opt-steps/epoch = 4650 total.
 attn_mask_annealing_enabled: false  # disabled: masked_attn_enabled=False in build_lora_model
 attn_mask_annealing_start_steps: [930, 2325, 3720]
 attn_mask_annealing_end_steps:   [1860, 3255, 4650]
 
-# ── Model capacity ───────────────────────────────────────────────────────────
-# 200 queries matches the COCO checkpoint shape — changing this causes a RuntimeError in load_state_dict (shape mismatch on network.q.weight even with strict=False).
+# --- Model capacity ---
+# 200 queries matches the COCO checkpoint shape, any other value breaks load_state_dict on network.q.weight
 num_q: 200
 
-# ── LoRA adapter architecture ─────────────────────────────────────────────────
-# LoRA adapters are always injected into the full backbone by MaskClassificationLoRA,
-# but trainable_blocks=[] in the notebook freezes ALL of them.
-# Only the fresh decoder heads are actually trained in this experiment.
-# 'proj' is the attention output projection — adds capacity at minimal parameter cost.
+# --- LoRA adapter architecture ---
+# LoRA dapters are injected everywhere by MaskClassificationLoRA,
+# but trainable_blocks=[] freezes all of them,
+# so only the fresh decoder heads actually train here.
 lora_r: 8
 lora_alpha: 16
-lora_target_modules: ['qkv', 'proj', 'fc1', 'fc2']
+lora_target_modules: ['qkv', 'proj', 'fc1', 'fc2'] # 'proj' is the attention output projection: adds capacity at minimal parameter cost.
 lora_dropout: 0.05
 gradient_clip_val: 1.0
 
-# ── Data augmentation ─────────────────────────────────────────────────────────
-# Gaussian blur (p=0.5) addresses the sharpness distribution shift COCO → Cityscapes.
+# --- Data augmentation ---
+# Gaussian blur (p=0.5) bridges the sharpness gap between COCO and Cityscapes
 gaussian_blur_enabled: true
