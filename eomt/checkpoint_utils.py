@@ -10,7 +10,7 @@ from peft import LoraConfig, get_peft_model
 
 def get_finetuned_model(checkpoint_path, device='cuda'):
     """
-    Loads the fine-tuned EoMT model using the 'Step 5 Enhanced' configuration.
+    Loads the fine-tuned EoMT model from a checkpoint
     
     Args:
         checkpoint_path (str): Path to the .ckpt or .pth file.
@@ -20,8 +20,7 @@ def get_finetuned_model(checkpoint_path, device='cuda'):
         torch.nn.Module: The loaded model in eval mode.
     """
     
-    # 1. Configuration (Matching Step 5 Enhanced)
-    # These MUST match the parameters used during the successful 76% mIoU run.
+    # 1. Configuration 
     CONFIG = {
         'img_size': (640, 640),
         'num_classes': 19,
