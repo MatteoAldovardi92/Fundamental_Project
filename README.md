@@ -22,7 +22,4 @@ This repository contains the consolidated and optimized codebase for cross-task 
 - **`Step7-8.ipynb`**: Anomaly detection notebook — evaluates both ERFNet and fine-tuned EoMT on anomaly datasets.
 - **`requirements.txt`**: List of dependencies required to run the environment.
 
-## Setup & Execution
-1. Install dependencies: `pip install -r requirements.txt` (and ensure `lightning`, `jsonargparse` are installed).
-2. Use the provided Jupyter Notebooks (`Step4.ipynb`, `Step5.ipynb`, `Step7-8.ipynb`) for inference, fine-tuning, evaluation, and visualizations.
 

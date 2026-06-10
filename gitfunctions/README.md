@@ -1,11 +1,11 @@
-# Git Helper Scripts
+# gitfunctions/
 
-This folder contains Python scripts to automate Git pushes and pulls directly from Google Colab.
-- `update_branch.py`: Stages, commits, and pushes changes.
-- `pull_branch.py`: Fetches and pulls the latest changes.
+Python scripts to automate Git operations from Google Colab. This folder is git-ignored and not pushed to the remote repository.
 
-This entire folder is ignored by `.gitignore` so it won't be pushed to the main remote repository.
+## Files
 
-## 📝 Interactive Notebooks
-
-- **`main.ipynb`**: Your 'sadder version of GitHub Desktop!' This notebook serves as an interactive UI to run these Git helper commands directly within Colab, saving you from wrestling with terminal outputs.
+| File | Description |
+|---|---|
+| `update_branch.py` | Stages, commits, and pushes changes |
+| `pull_branch.py` | Fetches and pulls the latest changes |
+| `main.ipynb` | Interactive notebook UI for running the Git helper scripts |
