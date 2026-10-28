@@ -1,245 +1,141 @@
-# 🌟 EoMT: Cross-Task Evaluation, LoRA Fine-Tuning & Anomaly Segmentation
+# EoMT: Cross-Task Evaluation, LoRA Fine-Tuning & Anomaly Detection
 
-<p align="center">
-  <img src="docs/static/images/teaser_arch.svg" alt="EoMT Architecture" width="85%" />
-</p>
-
-<p align="center">
-  <a href="https://arxiv.org/abs/2503.19108"><img src="https://img.shields.io/badge/arXiv-2503.19108-B31B1B.svg?style=for-the-badge" alt="arXiv"></a>
-  <a href="https://pytorch.org/"><img src="https://img.shields.io/badge/PyTorch-2.x-EE4C2C.svg?style=for-the-badge&logo=pytorch" alt="PyTorch"></a>
-  <a href="https://lightning.ai/"><img src="https://img.shields.io/badge/Lightning-2.x-792EE5.svg?style=for-the-badge&logo=lightning" alt="Lightning"></a>
-  <a href="https://cvpr.thecvf.com/"><img src="https://img.shields.io/badge/CVPR%202025-Highlight-blue.svg?style=for-the-badge" alt="CVPR 2025"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge" alt="License"></a>
-</p>
+> **Project for the course *Fundamentals of AI* (A.Y. 2025/2026) — Politecnico di Torino**  
+> **Author:** Matteo Aldovardi  
+> **Based on:** *Your ViT is Secretly an Image Segmentation Model* (CVPR 2025 Highlight) — [arXiv:2503.19108](https://arxiv.org/abs/2503.19108)
 
 ---
 
-## 📌 Executive Summary
+## 1. Project Overview & Objectives
 
-This repository hosts a consolidated, reproducible research and evaluation suite centered on the **Encoder-only Mask Transformer (EoMT)** ([CVPR 2025 Highlight](https://arxiv.org/abs/2503.19108)). 
+This project investigates the **Encoder-only Mask Transformer (EoMT)** architecture on dense scene understanding and safety-critical anomaly detection for autonomous driving. 
 
-Traditional universal segmentation architectures rely on specialized multi-scale decoders, pixel decoders, or transformer adapters (e.g., Mask2Former, ViT-Adapter). **EoMT** radically simplifies this paradigm: it demonstrates that a standard **Vision Transformer (ViT)** backbone can directly segment images by jointly encoding image patch tokens and learnable query tokens within the self-attention blocks—**eliminating decoders altogether** while achieving up to **$4\times$ faster inference** with ViT-L.
+Unlike traditional segmentation frameworks (e.g., Mask2Former) that require specialized pixel decoders or transformer adapters, EoMT repurposes a plain Vision Transformer (ViT) to jointly encode image patch tokens and segmentation query tokens in self-attention, removing decoder overhead entirely.
 
-### 🎯 Key Research Investigations in this Suite:
-1. **Cross-Task & Zero-Shot Transfer (Step 4):** Evaluates pre-trained EoMT checkpoints across disparate label spaces (COCO $\leftrightarrow$ Cityscapes) and handles resolution transitions via bicubic positional embedding interpolation.
-2. **Parameter-Efficient Fine-Tuning (PEFT) via LoRA (Step 5):** Adapts the 86M ViT backbone to autonomous driving scenes using Low-Rank Adaptation (LoRA), pushing Cityscapes semantic segmentation performance to **$75.39\%$ mIoU** with $<1.5\%$ trainable parameters.
-3. **Out-of-Distribution (OOD) & Road Anomaly Segmentation (Steps 7 & 8):** Conducts a comprehensive comparison between classical pixel-level architectures (**ERFNet**) and mask-based token transformers (**EoMT**) across 5 safety-critical anomaly benchmarks, establishing that mask classification logits with Residual-based Anomaly (RbA) yield state-of-the-art **$55.14\%$ AUPRC** on RoadAnomaly21.
+The project is structured into three main milestones:
+1. **Cross-Task & Zero-Shot Evaluation (Step 4):** Evaluate pre-trained EoMT checkpoints across different datasets (COCO $\to$ Cityscapes) and test bicubic positional embedding interpolation to handle varying image resolutions.
+2. **LoRA Fine-Tuning (Step 5):** Adapt the 86M parameter ViT-B backbone to Cityscapes semantic segmentation using Low-Rank Adaptation (LoRA) across three experimental configurations.
+3. **Out-of-Distribution & Anomaly Segmentation (Steps 7 & 8):** Compare mask-based representations (EoMT) against a real-time pixel-based baseline (**ERFNet**) on safety-critical road obstacle benchmarks using multiple uncertainty and anomaly scoring functions.
 
 ---
 
-## 🏗️ Repository Architecture
+## 2. Techniques & Evaluation Metrics
+
+### Architectures
+- **EoMT (ViT-B backbone, DINOv2 initialization):** Encoder-only mask classification model. Generates class logits and binary mask embeddings directly from query tokens.
+- **ERFNet:** Efficient residual factorized ConvNet used as a real-time pixel-level baseline.
+
+### Adaptation & Fine-Tuning
+- **Bicubic Positional Embedding Interpolation:** Dynamically resamples 2D positional embeddings when image input dimensions change (e.g., $640 \times 640$ COCO crops to Cityscapes resolutions).
+- **LoRA (Low-Rank Adaptation):** Decomposes weight updates in attention projections ($W = W_0 + \frac{\alpha}{r}BA$, with $r=8, \alpha=16$) combined with Layer-wise Learning Rate Decay (LLRD).
+
+### Anomaly Scoring Functions
+For detecting out-of-distribution (OOD) obstacles:
+- **MSP (Maximum Softmax Probability):** $S_{\text{MSP}}(\mathbf{x}) = 1 - \max_c P(y=c \mid \mathbf{x})$
+- **MaxLogit:** $S_{\text{ML}}(\mathbf{x}) = -\max_c z_c(\mathbf{x})$
+- **Max Entropy:** $S_{\text{Ent}}(\mathbf{x}) = -\sum_c P(c \mid \mathbf{x}) \log P(c \mid \mathbf{x})$
+- **RbA (Residual-based Anomaly):** Mask-level scoring that flags candidate segments that do not confidently match any in-distribution class.
+
+### Metrics
+- **mIoU (Mean Intersection over Union):** Primary metric for in-distribution Cityscapes semantic segmentation.
+- **AUPRC (Area Under Precision-Recall Curve):** Primary metric for anomaly detection due to extreme class imbalance (anomalies represent $<1\%$ of pixels).
+- **FPR@TPR95:** False Positive Rate at 95% True Positive Rate.
+
+---
+
+## 3. Results Scoreboard
+
+### A. LoRA Fine-Tuning on Cityscapes (Validation Set)
+
+Three experiments with increasing numbers of trainable LoRA blocks:
+
+| Experiment | Configuration | Trainable Parameters | Validation mIoU | Best Checkpoint |
+| :--- | :--- | :---: | :---: | :--- |
+| **Exp 1** | Prediction Head only | Head MLPs | **72.01%** | `val_loss_total=2.138.ckpt` |
+| **Exp 2** | Head + Blocks 9, 10, 11 | Head + 3 Decoder blocks | **73.31%** | `val_loss_total=2.084.ckpt` |
+| **Exp 3 (Best)** | Head + All 12 ViT Blocks + LLRD | Full Backbone LoRA | **75.39%** | `val_loss_total=2.009.ckpt` |
+
+*Exp 3 achieves $+3.38\%$ mIoU over head-only tuning, confirming that adapting early transformer attention layers improves low-level edge precision.*
+
+---
+
+### B. Road Anomaly & OOD Detection Scoreboard
+
+Comparison between pixel-level (**ERFNet**) and mask-level (**EoMT**) representations across 5 benchmark datasets:
+
+| Benchmark Dataset | ERFNet (MaxLogit)<br>AUPRC / FPR95 | EoMT (MSP)<br>AUPRC / FPR95 | EoMT (MaxLogit)<br>AUPRC / FPR95 | EoMT (**RbA**)<br>**AUPRC** / FPR95 |
+| :--- | :---: | :---: | :---: | :---: |
+| **SMIYC RoadAnomaly21** | 38.30% / 59.37% | 17.92% / 89.62% | 28.91% / 75.84% | **55.14%** / 72.42% |
+| **SMIYC RoadObstacle21** | 4.63% / 48.46% | 3.55% / 100.0% | 28.50% / 99.99% | **37.52%** / 100.0% |
+| **Fishyscapes Lost & Found** | 3.28% / 45.48% | 0.76% / 43.83% | 0.48% / 91.40% | **5.04%** / 55.03% |
+| **Fishyscapes Static** | 6.27% / 39.68% | 5.56% / 91.28% | 5.64% / 78.23% | **18.81%** / 70.03% |
+| **Road Anomaly** | 15.37% / 72.17% | 10.62% / 94.18% | 14.47% / 85.88% | **16.79%** / 93.91% |
+
+**Key takeaway:** EoMT paired with Residual-based Anomaly (RbA) dramatically outperforms pixel baselines on AUPRC (**55.14% vs 38.30%** on RoadAnomaly21 and **37.52% vs 4.63%** on RoadObstacle21), as object-level queries suppress false positive noise on boundary edges.
+
+---
+
+## 4. Repository Structure
 
 ```
 Fundamental_Project/
-├── Step4.ipynb                   # 🔬 Cross-task & zero-shot evaluation (COCO -> Cityscapes)
-├── Step5.ipynb                   # ⚡ LoRA fine-tuning on Cityscapes (3 systematic experiments)
-├── Step7-8.ipynb                 # 🛡️ Anomaly segmentation benchmarks (Pixel vs Mask representations)
-├── requirements.txt              # 📦 Python dependencies
+├── Step4.ipynb                   # Step 4: Cross-task evaluation & zero-shot transfer
+├── Step5.ipynb                   # Step 5: LoRA fine-tuning (Exp 1, Exp 2, Exp 3)
+├── Step7-8.ipynb                 # Steps 7–8: Anomaly detection benchmarks
+├── requirements.txt              # Environment dependencies
 │
-├── eomt/                         # 🧠 Core EoMT model library
-│   ├── configs/                  # Model and dataset YAML configurations
-│   ├── models/                   # ViT backbone, token query embeddings, prediction heads
-│   ├── training/                 # PyTorch Lightning modules and loss objectives
-│   └── utils/                    # Positional embedding interpolation and helper functions
+├── eomt/                         # Core EoMT library (models, configs, training)
+├── eval/                         # Evaluation scripts (IoU, ERFNet, anomaly scorers)
+│   ├── iouEval.py                # Per-class IoU calculator
+│   ├── evalAnomaly.py            # ERFNet anomaly runner
+│   ├── eomt_anomaly_eval.py      # EoMT anomaly runner
+│   └── erfnet.py                 # ERFNet model architecture
 │
-├── eval/                         # 📊 Evaluation and benchmarking engine
-│   ├── iouEval.py                # Streaming per-class IoU accumulator
-│   ├── evalAnomaly.py            # ERFNet pixel-level anomaly evaluator
-│   ├── eomt_anomaly_eval.py      # EoMT mask-level anomaly evaluator
-│   ├── erfnet.py                 # Real-time baseline architecture
-│   ├── eval_cityscapes_color.py  # Prediction colorizer for visual qualitative analysis
-│   └── eval_cityscapes_server.py # Cityscapes benchmark submission formatting
-│
-├── resultsAnomalyDetection/      # 📈 Empirical CSV logs across all OOD benchmarks
-│   ├── eomt_mask_results.csv     # MSP, MaxLogit, Entropy, RbA scores for EoMT
-│   ├── erfnet_pixel_results.csv  # Baseline pixel scores for ERFNet
-│   ├── dataset_anomaly_statistics.csv
-│   └── temperature_search_results.csv
-│
-├── saved_visualizations/         # 🎨 Qualitative prediction masks & performance plots
-│   ├── class_miou_histogram.png  # Per-class mIoU bar chart across Cityscapes classes
-│   └── prediction_sample_[1-5].png # Side-by-side RGB vs predicted segmentations
-│
-├── posthoc_metrics/              # 🔍 Post-hoc statistical calculations and analysis
-├── coco-classes-mapping-master/  # 🗺️ Category alignment tools (80-class vs 91-class COCO)
-├── best_eval_checkpoints/        # 💾 Storage for selected top-performing checkpoint weights
-└── docs/                         # 🌐 Static assets and publication showcase
+├── resultsAnomalyDetection/      # Raw CSV results for all benchmarks
+├── saved_visualizations/         # Class mIoU plot and prediction masks
+├── posthoc_metrics/              # Post-hoc evaluation utilities
+└── coco-classes-mapping-master/  # COCO class mapping utilities
 ```
 
 ---
 
-## 🔬 Experimental Workflows & Key Findings
+## 5. How to Run
 
-```mermaid
-flowchart TD
-    subgraph "Step 4: Cross-Task Evaluation"
-        A1["Pretrained EoMT (COCO & Cityscapes)"] --> A2["Bicubic Positional Embedding Interpolation"]
-        A2 --> A3["Zero-Shot COCO ➔ Cityscapes Evaluation"]
-        A2 --> A4["Supervised Baseline Benchmarking"]
-    end
-
-    subgraph "Step 5: LoRA Fine-Tuning"
-        B1["COCO-Pretrained ViT-B (86M)"] --> B2{"LoRA Configurations"}
-        B2 -->|Exp 1: Minimal| B3["Head Only (72.01% mIoU)"]
-        B2 -->|Exp 2: Decoder Only| B4["Blocks 9-11 (73.31% mIoU)"]
-        B2 -->|Exp 3: Full Backbone| B5["All 12 Blocks + LLRD (75.39% mIoU)"]
-    end
-
-    subgraph "Steps 7-8: Safety & Anomaly Detection"
-        C1["In-Distribution Models"] --> C2["Pixel-Level: ERFNet"]
-        C1 --> C3["Mask-Level: EoMT (Fine-Tuned)"]
-        C2 & C3 --> C4["Anomaly Metrics: MSP, MaxLogit, Entropy, RbA"]
-        C4 --> C5["5 OOD Datasets (SMIYC RA-21, RO-21, Fishyscapes, RoadAnomaly)"]
-    end
-```
-
----
-
-### 1️⃣ Step 4: Cross-Task Evaluation & Positional Embedding Interpolation
-
-Vision Transformers encode fixed spatial coordinate grids into patch embeddings $P \in \mathbb{R}^{N \times D}$. When switching resolutions (e.g., standard COCO crops $640 \times 640$ to Cityscapes $1024 \times 2048$), spatial token sequences mismatch. 
-
-The evaluation pipeline dynamically performs **bicubic positional embedding interpolation**:
-
-$$\mathbf{p}_{\text{target}}(x, y) = \sum_{i=0}^3 \sum_{j=0}^3 a_{ij} x^i y^j$$
-
-This enables evaluating pre-trained weights on arbitrary image resolutions without retraining positional priors.
-
----
-
-### 2️⃣ Step 5: Parameter-Efficient Fine-Tuning (PEFT) via LoRA
-
-Instead of full fine-tuning of the 86M ViT backbone, Low-Rank Adaptation decomposes weight updates into low-rank intrinsic subspaces:
-
-$$W = W_0 + \Delta W = W_0 + \frac{\alpha}{r} B A, \quad A \in \mathbb{R}^{r \times d_{\text{in}}}, \; B \in \mathbb{R}^{d_{\text{out}} \times r}$$
-
-with rank $r=8$ and scaling $\alpha=16$. We investigated three architectures:
-
-| Experiment | Description | Trainable Modules | Validation mIoU | Best Checkpoint |
-| :--- | :--- | :--- | :---: | :--- |
-| **Exp 1: Minimal** | Prediction Head only | Classification & Mask MLP | **$72.01\%$** | `val_loss_total=2.138.ckpt` |
-| **Exp 2: Partial** | Head + Last 3 ViT Blocks | Head + Blocks 9, 10, 11 | **$73.31\%$** | `val_loss_total=2.084.ckpt` |
-| **Exp 3: Full LoRA** | Head + All 12 ViT Blocks | All 12 Blocks + Head (LLRD) | **$75.39\%$** | `val_loss_total=2.009.ckpt` |
-
-> [!TIP]
-> **Exp 3** combined with **Layer-wise Learning Rate Decay (LLRD)** achieved top performance ($+3.38\%$ mIoU over head-only tuning), proving that distributing low-rank capacity throughout the early transformer layers preserves essential low-level edge features while refining semantic boundaries.
-
-#### 📊 Per-Class Semantic Segmentation Breakdown
-<p align="center">
-  <img src="saved_visualizations/class_miou_histogram.png" alt="Class mIoU Histogram" width="88%" />
-</p>
-
----
-
-### 3️⃣ Steps 7 & 8: Out-of-Distribution & Anomaly Segmentation
-
-Safety-critical perception systems must detect unexpected road obstacles and unknown objects. We benchmark **Pixel-based** predictions (ERFNet) against **Mask-based** token outputs (EoMT) across five standard benchmarks:
-- **SegmentMeIfYouCan RoadAnomaly21 (`SMIYC RA-21`)**
-- **SegmentMeIfYouCan RoadObstacle21 (`SMIYC RO-21`)**
-- **Fishyscapes Lost & Found (`FS L&F`)**
-- **Fishyscapes Static (`FS Static`)**
-- **Road Anomaly**
-
-#### Scoring Formulations:
-- **Maximum Softmax Probability (MSP):** $S_{\text{MSP}}(\mathbf{x}) = 1 - \max_{c} P(y=c \mid \mathbf{x})$
-- **MaxLogit:** $S_{\text{ML}}(\mathbf{x}) = -\max_{c} z_c(\mathbf{x})$
-- **Entropy:** $S_{\text{Ent}}(\mathbf{x}) = -\sum_{c} P(c \mid \mathbf{x}) \log P(c \mid \mathbf{x})$
-- **Residual-based Anomaly (RbA):** Aggregates mask queries where candidate masks fail to align with known category clusters.
-
-#### 🏆 Benchmark Results Matrix (AUPRC ↑ / FPR95 ↓)
-
-| Dataset | Metric | ERFNet (Pixel) - MaxLogit | EoMT (Mask) - MSP | EoMT (Mask) - MaxLogit | EoMT (Mask) - **RbA** |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| **SMIYC RA-21** | AUPRC / FPR95 | 38.30% / 59.37% | 17.92% / 89.62% | 28.91% / 75.84% | **55.14%** / 72.42% |
-| **SMIYC RO-21** | AUPRC / FPR95 | 4.63% / 48.46% | 3.55% / 100.0% | 28.50% / 99.99% | **37.52%** / 100.0% |
-| **FS Lost & Found** | AUPRC / FPR95 | 3.28% / 45.48% | 0.76% / 43.83% | 0.48% / 91.40% | **5.04%** / 55.03% |
-| **FS Static** | AUPRC / FPR95 | 6.27% / 39.68% | 5.56% / 91.28% | 5.64% / 78.23% | **18.81%** / 70.03% |
-| **Road Anomaly** | AUPRC / FPR95 | 15.37% / 72.17% | 10.62% / 94.18% | 14.47% / 85.88% | **16.79%** / 93.91% |
-
-> [!NOTE]
-> While pixel models like ERFNet achieve lower FPR95 on simple backgrounds, **EoMT with RbA dramatically outperforms on AUPRC** (e.g. **55.14% vs 38.30%** on SMIYC RA-21 and **37.52% vs 4.63%** on SMIYC RO-21). Mask-level queries eliminate high-frequency pixel chatter along boundary edges, leading to much cleaner obstacle discovery.
-
----
-
-## 🖼️ Qualitative Segmentation Gallery
-
-Below are sample inference outputs generated by fine-tuned EoMT on the Cityscapes validation set:
-
-| Prediction Sample 1 | Prediction Sample 2 |
-| :---: | :---: |
-| <img src="saved_visualizations/prediction_sample_1.png" width="100%"/> | <img src="saved_visualizations/prediction_sample_2.png" width="100%"/> |
-
-| Prediction Sample 3 | Prediction Sample 4 |
-| :---: | :---: |
-| <img src="saved_visualizations/prediction_sample_3.png" width="100%"/> | <img src="saved_visualizations/prediction_sample_4.png" width="100%"/> |
-
----
-
-## ⚡ Quickstart & Reproduction Guide
-
-### 1. Environment Setup
+### Installation
 
 ```bash
 # Clone the repository
 git clone https://github.com/MatteoAldovardi92/Fundamental_Project.git
 cd Fundamental_Project
 
-# Create and activate virtual environment
+# Create virtual environment and install packages
 python3 -m venv .venv
 source .venv/bin/activate
-
-# Install dependencies
 pip install -r requirements.txt
 ```
 
-### 2. Dataset Setup
-Prepare directory structures for Cityscapes and Anomaly validation splits:
-```
-eval/Validation_Dataset/
-├── RoadAnomaly21/
-├── RoadObstacle21/
-├── FS_LostFound_full/
-├── fs_static/
-└── RoadAnomaly/
-```
+### Notebooks Walkthrough
+1. **`Step4.ipynb`**: Loads pre-trained checkpoints, performs positional embedding interpolation, and evaluates zero-shot cross-dataset transfer on Cityscapes.
+2. **`Step5.ipynb`**: Executes the three LoRA fine-tuning experiments on Cityscapes and logs validation mIoU via PyTorch Lightning.
+3. **`Step7-8.ipynb`**: Runs evaluation across all five anomaly detection benchmarks for both ERFNet and EoMT, generating the summary CSV files.
 
-### 3. Running Notebooks
-- **Step 4 (Cross-Task Evaluation):**
-  Open `Step4.ipynb` to run zero-shot COCO inference on Cityscapes and verify positional interpolation.
-- **Step 5 (LoRA Fine-Tuning):**
-  Open `Step5.ipynb` to launch the 3 LoRA fine-tuning experiments with PyTorch Lightning and W&B logging.
-- **Steps 7 & 8 (Anomaly Evaluation):**
-  Open `Step7-8.ipynb` to compute MSP, MaxLogit, Entropy, and RbA anomaly metrics across all 5 benchmark datasets.
-
-### 4. Standalone CLI Evaluation
+### Standalone Evaluation Scripts
 ```bash
-# Evaluate IoU on Cityscapes
+# Evaluate segmentation IoU on Cityscapes
 python3 eval/eval_iou.py
 
-# Evaluate Anomaly Segmentation with ERFNet baseline
+# Evaluate ERFNet baseline anomaly detection
 python3 eval/evalAnomaly.py
 
-# Evaluate Anomaly Segmentation with EoMT mask output
+# Evaluate EoMT mask-based anomaly detection
 python3 eval/eomt_anomaly_eval.py
 ```
 
 ---
 
-## 📜 Citation & Acknowledgements
+## 6. References
 
-If you use this codebase or the EoMT architecture in your research, please cite the original CVPR 2025 paper:
-
-```bibtex
-@inproceedings{kerssies2025eomt,
-  author     = {Kerssies, Tommie and Cavagnero, Niccol\`{o} and Hermans, Alexander and Norouzi, Narges and Averta, Giuseppe and Leibe, Bastian and Dubbelman, Gijs and {de Geus}, Daan},
-  title      = {{Your ViT is Secretly an Image Segmentation Model}},
-  booktitle  = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
-  year       = {2025}
-}
-```
-
----
-
-<p align="center">
-  <b>Fundamental Project</b> · Developed and Maintained by <a href="https://github.com/MatteoAldovardi92">Matteo Aldovardi</a>
-</p>
+- Kerssies et al., *Your ViT is Secretly an Image Segmentation Model*, CVPR 2025.
+- Hu et al., *LoRA: Low-Rank Adaptation of Large Language Models*, ICLR 2022.
+- Romera et al., *ERFNet: Efficient Residual Factorized ConvNet for Real-Time Semantic Segmentation*, IEEE T-ITS 2018.
+- Chan et al., *SegmentMeIfYouCan: A Benchmark for Detecting Unexpected Obstacles on the Road*, NeurIPS 2021.
