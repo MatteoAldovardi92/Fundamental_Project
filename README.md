@@ -99,41 +99,7 @@ Fundamental_Project/
 
 ---
 
-## 5. How to Run
-
-### Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/MatteoAldovardi92/Fundamental_Project.git
-cd Fundamental_Project
-
-# Create virtual environment and install packages
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-```
-
-### Notebooks Walkthrough
-1. **`Step4.ipynb`**: Loads pre-trained checkpoints, performs positional embedding interpolation, and evaluates zero-shot cross-dataset transfer on Cityscapes.
-2. **`Step5.ipynb`**: Executes the three LoRA fine-tuning experiments on Cityscapes and logs validation mIoU via PyTorch Lightning.
-3. **`Step7-8.ipynb`**: Runs evaluation across all five anomaly detection benchmarks for both ERFNet and EoMT, generating the summary CSV files.
-
-### Standalone Evaluation Scripts
-```bash
-# Evaluate segmentation IoU on Cityscapes
-python3 eval/eval_iou.py
-
-# Evaluate ERFNet baseline anomaly detection
-python3 eval/evalAnomaly.py
-
-# Evaluate EoMT mask-based anomaly detection
-python3 eval/eomt_anomaly_eval.py
-```
-
----
-
-## 6. References
+## 5. References
 
 - Kerssies et al., *Your ViT is Secretly an Image Segmentation Model*, CVPR 2025.
 - Hu et al., *LoRA: Low-Rank Adaptation of Large Language Models*, ICLR 2022.
